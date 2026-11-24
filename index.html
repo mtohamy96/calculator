@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>آلة حاسبة علمية</title>
 <style>
   body{--bg:#d9dbd6;--body1:#2b2f33;--body2:#1d2023;--lcd:#b7c4a3;--ink:#1f2a1a;--num:#e9eae6;--numi:#1d2023;--op:#4a5057;--opi:#f2f2ee;--sci:#3b4046;--scii:#dfe2dc;--ac:#c0392b;--eq:#2f6f8f;--panel:#2b2f33;--panelink:#e4e6e1;--chip:#3b4046;--chipi:#dfe2dc}
@@ -11,8 +11,8 @@
   *{box-sizing:border-box}
   html,body{margin:0;min-height:100%}
   body{background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;font-family:"Segoe UI",Tahoma,Arial,sans-serif;transition:background .2s}
-  .wrap{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;justify-content:center}
-  .calc{direction:ltr;width:420px;max-width:100%;padding:20px 18px 22px;border-radius:22px;background:linear-gradient(160deg,var(--body1),var(--body2));box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+  .wrap{width:100%;display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;justify-content:center}
+  .calc{direction:ltr;width:min(420px,100%);max-width:100%;padding:20px 18px 22px;border-radius:22px;background:linear-gradient(160deg,var(--body1),var(--body2));box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08)}
   .chips{direction:rtl;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
   .chip{font:600 12px/1 inherit;font-family:inherit;background:var(--chip);color:var(--chipi);border:0;border-radius:14px;padding:7px 10px;cursor:pointer;box-shadow:none;height:auto}
   .chip:active{transform:none;box-shadow:none}
@@ -43,6 +43,18 @@
   .hist li b{display:block;font-size:16px}
   .hist .empty{opacity:.6;font-size:13px;direction:rtl;text-align:center;padding:20px 0;cursor:default}
   .hist .empty:hover{background:none}
+  :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  @media (max-width:480px){
+    body{padding:10px;align-items:flex-start}
+    .wrap{width:100%}
+    .calc{width:100%;padding:16px 12px 18px}
+    .keys{gap:7px}
+    button{height:54px}
+    .s{height:44px}
+    .hist{width:100%;max-height:360px}
+  }
   @media (prefers-reduced-motion:reduce){button,body{transition:none}}
 </style>
 </head>
