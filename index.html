@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>آلة حاسبة علمية</title>
+<meta name="theme-color" content="#1d2023">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الحاسبة">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <style>
   body{--bg:#d9dbd6;--body1:#2b2f33;--body2:#1d2023;--lcd:#b7c4a3;--ink:#1f2a1a;--num:#e9eae6;--numi:#1d2023;--op:#4a5057;--opi:#f2f2ee;--sci:#3b4046;--scii:#dfe2dc;--ac:#c0392b;--eq:#2f6f8f;--panel:#2b2f33;--panelink:#e4e6e1;--chip:#3b4046;--chipi:#dfe2dc}
   body[data-theme="1"]{--bg:#eceae4;--body1:#f6f5f1;--body2:#e3e1da;--lcd:#cfd8c3;--num:#ffffff;--numi:#222;--op:#c9ccd1;--opi:#222;--sci:#dcdfe3;--scii:#222;--ac:#d9534f;--eq:#3b82a8;--panel:#f6f5f1;--panelink:#222;--chip:#dcdfe3;--chipi:#222}
@@ -286,6 +294,11 @@
 
   load(); render();
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
 </script>
 </body>
 </html>
