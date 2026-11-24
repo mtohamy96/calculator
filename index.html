@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>آلة حاسبة علمية</title>
+<style>
+  body{--bg:#d9dbd6;--body1:#2b2f33;--body2:#1d2023;--lcd:#b7c4a3;--ink:#1f2a1a;--num:#e9eae6;--numi:#1d2023;--op:#4a5057;--opi:#f2f2ee;--sci:#3b4046;--scii:#dfe2dc;--ac:#c0392b;--eq:#2f6f8f;--panel:#2b2f33;--panelink:#e4e6e1;--chip:#3b4046;--chipi:#dfe2dc}
+  body[data-theme="1"]{--bg:#eceae4;--body1:#f6f5f1;--body2:#e3e1da;--lcd:#cfd8c3;--num:#ffffff;--numi:#222;--op:#c9ccd1;--opi:#222;--sci:#dcdfe3;--scii:#222;--ac:#d9534f;--eq:#3b82a8;--panel:#f6f5f1;--panelink:#222;--chip:#dcdfe3;--chipi:#222}
+  body[data-theme="2"]{--bg:#0d1b2a;--body1:#1b2f45;--body2:#13233a;--lcd:#a9d3cf;--ink:#0b2a2a;--num:#dfe9f3;--numi:#0f2236;--op:#2f4a68;--opi:#e8f0f8;--sci:#264059;--scii:#dbe7f2;--ac:#e05d4f;--eq:#1fa2a0;--panel:#13233a;--panelink:#dbe7f2;--chip:#264059;--chipi:#dbe7f2}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;font-family:"Segoe UI",Tahoma,Arial,sans-serif;transition:background .2s}
+  .wrap{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;justify-content:center}
+  .calc{direction:ltr;width:420px;max-width:100%;padding:20px 18px 22px;border-radius:22px;background:linear-gradient(160deg,var(--body1),var(--body2));box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+  .chips{direction:rtl;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .chip{font:600 12px/1 inherit;font-family:inherit;background:var(--chip);color:var(--chipi);border:0;border-radius:14px;padding:7px 10px;cursor:pointer;box-shadow:none;height:auto}
+  .chip:active{transform:none;box-shadow:none}
+  select.chip{appearance:auto}
+  .lcd{background:var(--lcd);color:var(--ink,#1f2a1a);border-radius:8px;padding:8px 12px 10px;margin-bottom:16px;box-shadow:inset 0 3px 8px rgba(0,0,0,.35);height:118px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+  .flags{font:700 11px/1 monospace;height:12px;display:flex;gap:12px;opacity:.75}
+  .expr{font:20px/1.2 "Courier New",monospace;text-align:right;white-space:nowrap;overflow-x:auto;overflow-y:hidden;direction:ltr;scrollbar-width:none;min-height:26px}
+  .expr::-webkit-scrollbar{display:none}
+  .out{font:600 36px/1 "Courier New",monospace;text-align:right;white-space:nowrap;overflow:hidden}
+  .out.prev{opacity:.5}
+  .keys{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+  button{font:600 18px/1 inherit;font-family:inherit;border:0;border-radius:10px;height:46px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.4);transition:transform .05s,box-shadow .05s;padding:0}
+  button:active{transform:translateY(3px);box-shadow:0 0 0 rgba(0,0,0,.4)}
+  button:focus-visible{outline:3px solid #f5c542;outline-offset:2px}
+  .n{background:var(--num);color:var(--numi)}
+  .o{background:var(--op);color:var(--opi)}
+  .s{background:var(--sci);color:var(--scii);font-size:14px;height:40px}
+  .ac{background:var(--ac);color:#fff}
+  .eq{background:var(--eq);color:#fff}
+  .on{outline:2px solid #f5c542}
+  body[data-mode="basic"] .sci{display:none}
+  .hist{direction:rtl;width:260px;max-width:100%;background:var(--panel);color:var(--panelink);border-radius:18px;padding:14px;display:flex;flex-direction:column;box-shadow:0 18px 40px rgba(0,0,0,.25);max-height:640px}
+  .hist.hide{display:none}
+  .hist h2{font-size:15px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+  .hist ul{list-style:none;margin:0;padding:0;overflow:auto;flex:1}
+  .hist li{padding:8px 6px;border-bottom:1px solid rgba(128,128,128,.25);cursor:pointer;direction:ltr;text-align:right;font-family:"Courier New",monospace;font-size:13px;word-break:break-all}
+  .hist li:hover{background:rgba(128,128,128,.15)}
+  .hist li b{display:block;font-size:16px}
+  .hist .empty{opacity:.6;font-size:13px;direction:rtl;text-align:center;padding:20px 0;cursor:default}
+  .hist .empty:hover{background:none}
+  @media (prefers-reduced-motion:reduce){button,body{transition:none}}
+</style>
+</head>
+<body data-theme="0" data-mode="sci">
+<div class="wrap">
+  <div class="calc" role="application" aria-label="آلة حاسبة علمية">
+    <div class="chips">
+      <button class="chip" id="cMode">الوضع: علمي</button>
+      <button class="chip" id="cTheme">الشكل: داكن</button>
+      <button class="chip" id="cHist">السجل: ظاهر</button>
+      <select class="chip" id="cDec" aria-label="الخانات العشرية">
+        <option value="auto">عشري: تلقائي</option>
+        <option value="0">0 خانات</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="6">6</option><option value="8">8</option>
+      </select>
+      <button class="chip" id="cSep">فواصل الآلاف: نعم</button>
+    </div>
+    <div class="lcd">
+      <div class="flags"><span id="fAng">DEG</span><span id="fSec"></span><span id="fM"></span><span id="fE"></span></div>
+      <div class="expr" id="expr"></div>
+      <div class="out" id="out">0</div>
+    </div>
+    <div class="keys" id="keys"></div>
+  </div>
+  <aside class="hist" id="hist" aria-label="سجل العمليات">
+    <h2>سجل العمليات <button class="chip" id="hClear">مسح</button></h2>
+    <ul id="hList"></ul>
+  </aside>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const S = {expr:'',res:'',done:false,ans:0,mem:0,ang:'DEG',second:false,hist:[],dec:'auto',sep:true,theme:0,mode:'sci',showHist:true,err:''};
+  const THEMES = ['داكن','فاتح','أزرق'];
+
+  /* ---------- حفظ الإعدادات ---------- */
+  const save = () => { try { localStorage.setItem('calcState', JSON.stringify({hist:S.hist.slice(0,60),mem:S.mem,ang:S.ang,dec:S.dec,sep:S.sep,theme:S.theme,mode:S.mode,showHist:S.showHist,ans:S.ans})); } catch(e){} };
+  const load = () => { try { const o = JSON.parse(localStorage.getItem('calcState')||'null'); if (o) Object.assign(S,o); } catch(e){} };
+
+  /* ---------- المحرك الحسابي ---------- */
+  const MATH = 'Math ERROR', SYN = 'Syntax ERROR';
+  const toRad = x => S.ang==='DEG' ? x*Math.PI/180 : S.ang==='RAD' ? x : x*Math.PI/200;
+  const fromRad = x => S.ang==='DEG' ? x*180/Math.PI : S.ang==='RAD' ? x : x*200/Math.PI;
+  const snap = r => Math.abs(r) < 1e-15 ? 0 : r;
+  const fact = n => { if (n<0 || !Number.isInteger(n) || n>170) throw new Error(MATH); let r=1; for (let k=2;k<=n;k++) r*=k; return r; };
+  const dom = (c) => { if (!c) throw new Error(MATH); };
+  const FN = {
+    sin:x=>snap(Math.sin(toRad(x))), cos:x=>snap(Math.cos(toRad(x))),
+    tan:x=>{ const c=Math.cos(toRad(x)); dom(Math.abs(c)>1e-15); return snap(Math.tan(toRad(x))); },
+    asin:x=>{dom(Math.abs(x)<=1); return fromRad(Math.asin(x));}, acos:x=>{dom(Math.abs(x)<=1); return fromRad(Math.acos(x));}, atan:x=>fromRad(Math.atan(x)),
+    sinh:Math.sinh, cosh:Math.cosh, tanh:Math.tanh,
+    log:x=>{dom(x>0); return Math.log10(x);}, ln:x=>{dom(x>0); return Math.log(x);},
+    '√':x=>{dom(x>=0); return Math.sqrt(x);}, '∛':Math.cbrt, abs:Math.abs
+  };
+  const NAMES = '(asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|abs|nPr|nCr|Ans|π|e|[+\\-−×÷*\\/^!%(),√∛])';
+  const NUM = '(\\d+\\.?\\d*(?:E[+\\-−]?\\d+)?|\\.\\d+(?:E[+\\-−]?\\d+)?)';
+  function evaluate(src) {
+    const re = new RegExp('\\s*(?:'+NUM+'|'+NAMES+')','y');
+    const toks = []; let pos = 0;
+    while (pos < src.length) {
+      re.lastIndex = pos; const m = re.exec(src);
+      if (!m) { if (/^\s*$/.test(src.slice(pos))) break; throw new Error(SYN); }
+      toks.push(m[1] !== undefined ? {t:'n',v:parseFloat(m[1].replace('−','-'))} : {t:'o',v:m[2]});
+      pos = re.lastIndex;
+    }
+    let i = 0;
+    const peek = () => toks[i];
+    const is = (t,...a) => t && t.t==='o' && a.includes(t.v);
+    const startsOperand = t => t && (t.t==='n' || (t.t==='o' && (['(','π','e','Ans','√','∛','nPr','nCr'].includes(t.v) || t.v in FN)));
+    function expr(){ let v=term(); for(;;){ const t=peek(); if(is(t,'+')){i++;v+=term();} else if(is(t,'-','−')){i++;v-=term();} else break; } return v; }
+    function term(){ let v=unary(); for(;;){ const t=peek();
+      if(is(t,'×','*')){i++;v*=unary();}
+      else if(is(t,'÷','/')){i++;const d=unary(); dom(d!==0); v/=d;}
+      else if(startsOperand(t)){v*=unary();} else break; } return v; }
+    function unary(){ const t=peek(); if(is(t,'+')){i++;return unary();} if(is(t,'-','−')){i++;return -unary();} return power(); }
+    function power(){ const b=postfix(); if(is(peek(),'^')){ i++; const e=unary(); const r=Math.pow(b,e); dom(isFinite(r)); return r; } return b; }
+    function postfix(){ let v=primary(); for(;;){ const t=peek(); if(is(t,'!')){i++;v=fact(v);} else if(is(t,'%')){i++;v/=100;} else break; } return v; }
+    function paren(){ i++; const v=expr(); if(is(peek(),')')) i++; return v; }
+    function primary(){
+      const t=peek(); if(!t) throw new Error(SYN); i++;
+      if(t.t==='n') return t.v;
+      switch(t.v){
+        case '(': i--; return paren();
+        case 'π': return Math.PI;
+        case 'e': return Math.E;
+        case 'Ans': return S.ans;
+        case 'nPr': case 'nCr': {
+          if(!is(peek(),'(')) throw new Error(SYN); i++;
+          const n=expr(); if(!is(peek(),',')) throw new Error(SYN); i++;
+          const r=expr(); if(is(peek(),')')) i++;
+          dom(Number.isInteger(n)&&Number.isInteger(r)&&r>=0&&r<=n);
+          return t.v==='nPr' ? fact(n)/fact(n-r) : Math.round(fact(n)/(fact(r)*fact(n-r)));
+        }
+      }
+      if (t.v in FN) { const a = is(peek(),'(') ? paren() : postfix(); const r = FN[t.v](a); dom(isFinite(r)); return r; }
+      throw new Error(SYN);
+    }
+    if (!toks.length) throw new Error(SYN);
+    const v = expr(); if (i < toks.length) throw new Error(SYN);
+    dom(isFinite(v)); return v;
+  }
+
+  /* ---------- التنسيق ---------- */
+  function fmt(n) {
+    let r = Math.abs(n) < 1e-14 ? 0 : n, s;
+    const a = Math.abs(r);
+    if (S.dec !== 'auto' && a < 1e12) s = r.toFixed(+S.dec);
+    else if (a >= 1e12 || (a > 0 && a < 1e-9)) s = r.toExponential(8).replace(/\.?0+e/,'e').replace('e+','E').replace('e-','E-');
+    else s = String(parseFloat(r.toPrecision(12)));
+    if (S.sep && !s.includes('E')) { const neg = s[0]==='-'; if (neg) s = s.slice(1); let [ip,dp] = s.split('.'); ip = ip.replace(/\B(?=(\d{3})+(?!\d))/g,','); s = (neg?'-':'')+ip+(dp!==undefined?'.'+dp:''); }
+    return s;
+  }
+  const raw = n => { const f = S.dec; const o = {dec:S.dec,sep:S.sep}; S.dec='auto'; S.sep=false; const s = fmt(n).replace('E','E'); S.dec=o.dec; S.sep=o.sep; return s; };
+
+  /* ---------- الإدخال ---------- */
+  const OPSTART = /^[+\-−×÷^!%]/;
+  function insert(t) {
+    if (S.done) { S.expr = OPSTART.test(t) ? 'Ans' : ''; S.done = false; S.res = ''; }
+    S.err = ''; S.expr += t;
+  }
+  function backspace() {
+    if (S.done) { S.done = false; S.res = ''; return; }
+    S.err = '';
+    S.expr = S.expr.replace(/(asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|sin\(|cos\(|tan\(|log\(|ln\(|abs\(|nPr\(|nCr\(|√\(|∛\(|Ans|.)$/, '');
+  }
+  function current() { try { return S.expr.trim() ? evaluate(S.expr) : S.ans; } catch(e) { return S.ans; } }
+  function equals() {
+    if (!S.expr.trim()) return;
+    try {
+      const v = evaluate(S.expr);
+      S.ans = v; S.res = fmt(v); S.done = true; S.err = '';
+      S.hist.unshift({e:S.expr, r:S.res, raw:raw(v)});
+      if (S.hist.length > 60) S.hist.pop();
+    } catch(e) { S.err = e.message === MATH ? MATH : SYN; S.done = false; }
+  }
+  function memOp(k) {
+    const v = current();
+    if (k==='mc') S.mem = 0; else if (k==='mr') insert(raw(S.mem));
+    else if (k==='m+') S.mem += v; else if (k==='m-') S.mem -= v; else if (k==='ms') S.mem = v;
+  }
+  async function copy() {
+    const txt = S.done ? raw(S.ans) : (S.res || S.expr);
+    try { await navigator.clipboard.writeText(txt); }
+    catch(e){ const t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch(_){} t.remove(); }
+    const o = $('out'); const old = o.textContent; o.textContent = 'تم النسخ'; setTimeout(render, 600);
+  }
+
+  /* ---------- الأزرار ---------- */
+  // [label, action, class, label2, action2]
+  const KEYS = [
+    ['2nd','second','s sci'],['DEG','ang','s sci'],['sin','ins:sin(','s sci','sin⁻¹','ins:asin('],['cos','ins:cos(','s sci','cos⁻¹','ins:acos('],['tan','ins:tan(','s sci','tan⁻¹','ins:atan('],
+    ['π','ins:π','s sci'],['e','ins:e','s sci'],['log','ins:log(','s sci','10ˣ','ins:10^('],['ln','ins:ln(','s sci','eˣ','ins:e^('],['xʸ','ins:^','s sci','sinh','ins:sinh('],
+    ['n!','ins:!','s sci'],['nPr','ins:nPr(','s sci'],['nCr','ins:nCr(','s sci'],[',','ins:,','s sci'],['Ans','ins:Ans','s sci'],
+    ['EXP','ins:E','s sci'],['Ran#','ran','s sci'],['|x|','ins:abs(','s sci','cosh','ins:cosh('],['∛','ins:∛(','s sci'],['نسخ','copy','s sci'],
+    ['MC','mc','s'],['MR','mr','s'],['M+','m+','s'],['M−','m-','s'],['MS','ms','s'],
+    ['(','ins:(','o'],[')','ins:)','o'],['%','ins:%','o'],['⌫','back','o'],['AC','ac','ac'],
+    ['7','ins:7','n'],['8','ins:8','n'],['9','ins:9','n'],['÷','ins:÷','o'],['√','ins:√(','o'],
+    ['4','ins:4','n'],['5','ins:5','n'],['6','ins:6','n'],['×','ins:×','o'],['x²','ins:^2','o','x³','ins:^3'],
+    ['1','ins:1','n'],['2','ins:2','n'],['3','ins:3','n'],['−','ins:−','o'],['1/x','ins:^(−1)','o'],
+    ['0','ins:0','n'],['.','ins:.','n'],['±','ins:(−','n'],['+','ins:+','o'],['=','eq','eq']
+  ];
+  const keysEl = $('keys');
+  KEYS.forEach((k,idx) => { const b = document.createElement('button'); b.className = k[2]; b.dataset.i = idx; b.type='button'; keysEl.appendChild(b); });
+  const btns = [...keysEl.children];
+
+  function act(a) {
+    if (a.startsWith('ins:')) { insert(a.slice(4)); if (S.second) S.second = false; }
+    else switch (a) {
+      case 'eq': equals(); break;
+      case 'ac': S.expr=''; S.res=''; S.done=false; S.err=''; break;
+      case 'back': backspace(); break;
+      case 'second': S.second = !S.second; break;
+      case 'ang': S.ang = S.ang==='DEG'?'RAD':S.ang==='RAD'?'GRAD':'DEG'; break;
+      case 'ran': insert(Math.random().toFixed(3)); break;
+      case 'copy': copy(); return;
+      default: memOp(a);
+    }
+    render(); save();
+  }
+  keysEl.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const k = KEYS[+b.dataset.i];
+    act(S.second && k[4] ? k[4] : k[1]);
+  });
+
+  /* ---------- العرض ---------- */
+  function render() {
+    document.body.dataset.theme = S.theme; document.body.dataset.mode = S.mode;
+    btns.forEach((b,i) => { const k = KEYS[i]; b.textContent = S.second && k[3] ? k[3] : (k[1]==='ang' ? S.ang : k[0]); b.classList.toggle('on', k[1]==='second' && S.second); });
+    $('expr').textContent = S.expr; $('expr').scrollLeft = 1e6;
+    const out = $('out'); let t, prev = false;
+    if (S.err) t = S.err;
+    else if (S.done) t = S.res;
+    else { t = '0'; if (S.expr.trim()) { try { const v = evaluate(S.expr); if (!/^[\d.]+$/.test(S.expr.trim())) { t = fmt(v); prev = true; } } catch(e){ t = ''; } } }
+    out.textContent = t || ' '; out.classList.toggle('prev', prev);
+    out.style.fontSize = t.length > 20 ? '20px' : t.length > 15 ? '26px' : t.length > 11 ? '31px' : '36px';
+    $('fAng').textContent = S.ang; $('fSec').textContent = S.second ? '2nd' : ''; $('fM').textContent = S.mem !== 0 ? 'M' : ''; $('fE').textContent = S.err ? 'E' : '';
+    $('cMode').textContent = 'الوضع: ' + (S.mode==='sci' ? 'علمي' : 'عادي');
+    $('cTheme').textContent = 'الشكل: ' + THEMES[S.theme];
+    $('cHist').textContent = 'السجل: ' + (S.showHist ? 'ظاهر' : 'مخفي');
+    $('cSep').textContent = 'فواصل الآلاف: ' + (S.sep ? 'نعم' : 'لا');
+    $('cDec').value = S.dec;
+    $('hist').classList.toggle('hide', !S.showHist);
+    const ul = $('hList'); ul.innerHTML = '';
+    if (!S.hist.length) { const li = document.createElement('li'); li.className='empty'; li.textContent='لا توجد عمليات بعد'; ul.appendChild(li); }
+    S.hist.forEach(h => { const li = document.createElement('li'); li.title='اضغط لإعادة استخدام العملية'; li.innerHTML = '<span></span><b></b>'; li.firstChild.textContent = h.e; li.lastChild.textContent = '= ' + h.r; li.onclick = () => { S.expr = h.e; S.done=false; S.res=''; S.err=''; render(); }; ul.appendChild(li); });
+  }
+
+  $('cMode').onclick = () => { S.mode = S.mode==='sci' ? 'basic' : 'sci'; render(); save(); };
+  $('cTheme').onclick = () => { S.theme = (S.theme+1)%3; render(); save(); };
+  $('cHist').onclick = () => { S.showHist = !S.showHist; render(); save(); };
+  $('cSep').onclick = () => { S.sep = !S.sep; render(); save(); };
+  $('cDec').onchange = e => { S.dec = e.target.value; if (S.done) { try { S.res = fmt(S.ans); } catch(_){} } render(); save(); };
+  $('hClear').onclick = () => { S.hist = []; render(); save(); };
+
+  /* ---------- الكيبورد ---------- */
+  const KMAP = {'*':'×','/':'÷','-':'−','p':'π','s':'sin(','c':'cos(','t':'tan(','l':'log(','n':'ln(','r':'√(','a':'Ans','E':'E'};
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.target.tagName === 'SELECT') return;
+    const k = e.key;
+    if (/^[0-9]$/.test(k) || '+^()!%,'.includes(k) && k.length===1) { act('ins:'+k); }
+    else if (k === '.') act('ins:.');
+    else if (KMAP[k]) act('ins:'+KMAP[k]);
+    else if (k === 'Enter' || k === '=') { e.preventDefault(); act('eq'); }
+    else if (k === 'Backspace') act('back');
+    else if (k === 'Escape' || k === 'Delete') act('ac');
+    else return;
+    if (document.activeElement && document.activeElement.tagName === 'BUTTON') document.activeElement.blur();
+  });
+
+  load(); render();
+})();
+</script>
+</body>
+</html>
